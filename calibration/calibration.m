@@ -10,7 +10,7 @@
 
 clear;close all;
 BallRad=25.4/2; % Ball's radius, in mm
-border=10;
+border=20;
 BALL_MANUAL=1;      % whether to find the ball manually
 
 % type='new';  % choose whether it's the new sensor or the old one
@@ -18,7 +18,7 @@ BALL_MANUAL=1;      % whether to find the ball manually
 
 %% Check the folder and the calibration file name
 name2=['testpics'];
-Inputfolder='../testpics/7.09/';
+Inputfolder='../testpics/';
 savename=[name2 '.mat'];
 
 

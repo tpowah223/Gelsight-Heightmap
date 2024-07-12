@@ -9,7 +9,7 @@ lookupfile=[Inputfolder 'testpics.mat'];
 
 [framename,location] = uigetfile('*.jpg');
 
-border=0;
+border=20;
 
 
 load(lookupfile);
