@@ -9,7 +9,7 @@
 % Mod by Wenzhen Yuan (yuanwenzhen@gmail.com), Jan 2018
 
 clear;close all;
-BallRad=12.414; %25.4/2; % Ball's radius, in mm
+BallRad=25.4/2; % Ball's radius, in mm
 border=20; %change too
 BALL_MANUAL=1;      % whether to find the ball manually
 
@@ -18,7 +18,7 @@ BALL_MANUAL=1;      % whether to find the ball manually
 
 %% Check the folder and the calibration file name
 name2=['testpics'];
-Inputfolder='../testpics/7.09/';
+Inputfolder='../testpics/';
 savename=[name2 '.mat'];
 
 
