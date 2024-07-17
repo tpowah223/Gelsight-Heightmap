@@ -10,7 +10,7 @@
 
 clear;close all;
 BallRad=12.414; %25.4/2; % Ball's radius, in mm
-border=20; %change too
+border= 0; % i dont think we need a border
 BALL_MANUAL=1;      % whether to find the ball manually
 
 % type='new';  % choose whether it's the new sensor or the old one
@@ -18,7 +18,7 @@ BALL_MANUAL=1;      % whether to find the ball manually
 
 %% Check the folder and the calibration file name
 name2=['testpics'];
-Inputfolder='../testpics/7.09/';
+Inputfolder='../testpics/7.16.2/';
 savename=[name2 '.mat'];
 
 
@@ -33,7 +33,8 @@ bins=80;
 gradmag=[];gradir=[];countmap=[];
 
 
-Pixmm=0.012254051;   % for 1920*1080 pixels and real world area of 210*121 (mm)
+Pixmm=0.022048309;   % for 967*951 pix, 137*148 (mm)
+
 zeropoint=-90;  %investigate
 lookscale=180;   %investigate
 
@@ -54,8 +55,8 @@ for Frn=1:length(ImList)
 
     frame=imread([Inputfolder ImList(Frn).name]);
     display(['Calibration on Frame' num2str(Frn)]);
-    frame_=frame(border+1:end-border,border+1:end-border,:);
-    I=double(frame_)-f0;    
+    frame_=frame(border+1:end-border,border+1:end-border,:); %unnecessary
+    I=double(frame)-f0;    
     dI=(min(I,[],3)-max(I,[],3))/2; %why?
     
     [ContactMask, validMask, touchCenter, Radius]= FindBallArea_coarse(dI,frame_,BALL_MANUAL);

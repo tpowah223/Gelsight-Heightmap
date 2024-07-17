@@ -4,7 +4,7 @@ function [f0, f01]=iniFrame(frame0, border)
 
 
 % frame0 is the raw data from camera
-kscale=50; %what dis is
+kscale=70; %what dis is
 kernnel=fspecial('gaussian',[kscale*2 kscale*2],kscale*1);
 % fspecial ( gaussian, hsize, sigma)
 % better to use imgaussfilt for 2d or filt3 for 3d
@@ -15,9 +15,9 @@ frame0_=double(frame0);
 f0(:,:,1)=conv2(frame0_(:,:,1),kernnel,'same');
 f0(:,:,2)=conv2(frame0_(:,:,2),kernnel,'same');
 f0(:,:,3)=conv2(frame0_(:,:,3),kernnel,'same');
-%f0=f0(border+1:end-border,border+1:end-border,:);
+f0=f0(border+1:end-border,border+1:end-border,:);
 
-frame_=frame0_;
+frame_=frame0_(border+1:end-border,border+1:end-border,:);
 dI=mean(f0-frame_,3);
 
 %if ther is a small (5) difference in the values of f0 and frame, this 

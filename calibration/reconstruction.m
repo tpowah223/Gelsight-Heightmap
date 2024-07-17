@@ -4,12 +4,12 @@ clear LookupTable;
 
 
 %% Check the folder and the calibration file name
-Inputfolder='../testpics/7.09/';
+Inputfolder='../testpics/7.16.2/';
 lookupfile=[Inputfolder 'testpics.mat'];
 
-[framename,location] = uigetfile('*.jpg');
+[framename,location] = uigetfile('Im*.jpg');
 
-border=20;
+border=0;
 
 
 load(lookupfile);
