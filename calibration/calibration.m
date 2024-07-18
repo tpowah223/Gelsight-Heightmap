@@ -8,78 +8,66 @@
 %
 % Mod by Wenzhen Yuan (yuanwenzhen@gmail.com), Jan 2018
 
-clear;close all;
+clear; close all;
 BallRad=12.414; %25.4/2; % Ball's radius, in mm
 border= 0; % i dont think we need a border
 BALL_MANUAL=1;      % whether to find the ball manually
 
-% type='new';  % choose whether it's the new sensor or the old one
-
-
 %% Check the folder and the calibration file name
-name2=['testpics'];
-Inputfolder='../testpics/7.16.2/';
-savename=[name2 '.mat'];
+name2 = 'testpics';
+Inputfolder = '../testpics/7.16.2/';
+savename = [name2 '.mat'];
 
+%% Generate lookup table
+bins = 80;
+gradmag = [];
+gradir = [];
+countmap = [];
 
-% addpath(genpath('functions'));
+% Initialize zeropoint and lookscale with default values
+zeropoint = -120; % slight improvement in eliminating noise when raised, but beyond 120 it does not make significant changes
+lookscale = 180; % Default lookscale
 
+Pixmm = 0.022048309; % for 967*951 pix, 137*148 (mm)
 
+BallRad_pix = BallRad / Pixmm;
 
-%% generate lookup table 
-READ_RADIUS=0;
+% Read Initial Image
+frame0 = imread([Inputfolder 'frame0.jpg']);
+[f0, f01] = iniFrame(frame0, border);
 
-bins=80;
-gradmag=[];gradir=[];countmap=[];
+% List of calibration images
+ImList = dir([Inputfolder 'Im*']);
 
-
-Pixmm=0.022048309;   % for 967*951 pix, 137*148 (mm)
-
-zeropoint=-90;  %investigate
-lookscale=180;   %investigate
-
-BallRad_pix=BallRad/Pixmm; %Pixmm turns mm to pixels
-             
-
-% read Ini Image
-frame0=imread([Inputfolder 'frame0.jpg']);
-f0 = iniFrame(frame0, border);
-
-
-
-
-% list of calibration images
-ImList=dir([Inputfolder 'Im*']);
-
-for Frn=1:length(ImList)
-
-    frame=imread([Inputfolder ImList(Frn).name]);
-    display(['Calibration on Frame' num2str(Frn)]);
-    frame_=frame(border+1:end-border,border+1:end-border,:); %unnecessary
-    I=double(frame)-f0;    
-    dI=(min(I,[],3)-max(I,[],3))/2; %why?
+% Process each calibration image
+for Frn = 1:length(ImList)
+    frame = imread([Inputfolder ImList(Frn).name]);
+    disp(['Calibration on Frame ' num2str(Frn)]);
+    frame_ = frame(border+1:end-border, border+1:end-border, :);
+    I = double(frame) - f0;
+    dI = (min(I, [], 3) - max(I, [], 3)) / 2;
     
-    [ContactMask, validMask, touchCenter, Radius]= FindBallArea_coarse(dI,frame_,BALL_MANUAL);
-    validMask=validMask & ContactMask;
+    [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(dI, frame_, BALL_MANUAL);
+    validMask = validMask & ContactMask;
     
-    nomarkermask=min(-I,[],3)<30;   % for new sensor
-    nomarkermask=imerode(nomarkermask,strel('disk',3)); 
-    validMask=validMask & nomarkermask;      
-    [gradmag, gradir,countmap]=LookuptableFromBall_Bnz(I,f0, bins , touchCenter, BallRad, Pixmm, validMask, gradmag, gradir, countmap, zeropoint, lookscale);
-
+    nomarkermask = min(-I, [], 3) < 30;
+    nomarkermask = imerode(nomarkermask, strel('disk', 3));
+    validMask = validMask & nomarkermask;
+    
+    [gradmag, gradir, countmap] = LookuptableFromBall_Bnz(I, f0, bins, touchCenter, BallRad, Pixmm, validMask, gradmag, gradir, countmap, zeropoint, lookscale);
 end
 
 disp('Internal calibration process starts');
 
-[GradMag, GradDir]=LookuptableSmooth(bins, gradmag, gradir, countmap);
-LookupTable.bins=bins;
-LookupTable.GradMag=GradMag;
-LookupTable.GradDir=GradDir;
-LookupTable.GradX=-cos(GradDir).*GradMag;
-LookupTable.GradY=sin(GradDir).*GradMag;
-LookupTable.Zeropoint=zeropoint;
-LookupTable.Scale=lookscale;
-LookupTable.Pixmm=Pixmm;
-LookupTable.FrameSize=size(frame);
-save([Inputfolder savename],'LookupTable');    %Save the loopup table file
+[GradMag, GradDir] = LookuptableSmooth(bins, gradmag, gradir, countmap);
+LookupTable.bins = bins;
+LookupTable.GradMag = GradMag;
+LookupTable.GradDir = GradDir;
+LookupTable.GradX = -cos(GradDir) .* GradMag;
+LookupTable.GradY = sin(GradDir) .* GradMag;
+LookupTable.Zeropoint = zeropoint;
+LookupTable.Scale = lookscale;
+LookupTable.Pixmm = Pixmm;
+LookupTable.FrameSize = size(frame);
+save([Inputfolder savename], 'LookupTable');
 disp('Calibration Done');
