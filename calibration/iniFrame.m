@@ -4,32 +4,39 @@ function [f0, f01]=iniFrame(frame0, border)
 
 
 % frame0 is the raw data from camera
-kscale=50; %what dis is
-kernnel=fspecial('gaussian',[kscale*2 kscale*2],kscale*1);
+%kscale=50; %what dis is
+%kernnel=fspecial('gaussian',[kscale*2 kscale*2],kscale*1);
 % fspecial ( gaussian, hsize, sigma)
 % better to use imgaussfilt for 2d or filt3 for 3d
+% frame0 is the raw data from the camera
 
-%convolutions and cropping
-%is dis necessary
-frame0_=double(frame0);
-f0(:,:,1)=conv2(frame0_(:,:,1),kernnel,'same');
-f0(:,:,2)=conv2(frame0_(:,:,2),kernnel,'same');
-f0(:,:,3)=conv2(frame0_(:,:,3),kernnel,'same');
-%f0=f0(border+1:end-border,border+1:end-border,:);
+kscale = 50; % Kernel scale for the Gaussian filter
+frame0_ = double(frame0);
 
-frame_=frame0_;
-dI=mean(f0-frame_,3);
+% Apply Gaussian filter using built-in function
+f0 = imgaussfilt(frame0_, kscale);
 
-%if ther is a small (5) difference in the values of f0 and frame, this 
-% weights the result to mostally the original image and .15 of filtered
-% image, doesnt seem strictly necessary, have to figure out what else
-% depends on f01
+% Crop the image if border is specified
+if border > 0
+    f0 = f0(border+1:end-border, border+1:end-border, :);
+    frame0_ = frame0_(border+1:end-border, border+1:end-border, :);
+end
 
-id=find(dI<5);
-pixcount=size(f0,1)*size(f0,2);
-f0(id)=f0(id)*0.15+frame_(id)*0.85;
-f0(id+pixcount)=f0(id+pixcount)*0.15+frame_(id+pixcount)*0.85;
-f0(id+pixcount*2)=f0(id+pixcount*2)*0.15+frame_(id+pixcount*2)*0.85;
+% Compute the mean difference between the original and filtered image
+dI = mean(f0 - frame0_, 3);
 
-t=mean(f0(:));
-f01=1+((t./f0)-1)*2;
+% Adaptive threshold based on image statistics
+threshold = mean(dI(:)) + std(dI(:));
+
+% Blend original and filtered image based on adaptive threshold
+blendMask = dI < threshold;
+f0(blendMask) = f0(blendMask) * 0.15 + frame0_(blendMask) * 0.85;
+
+% Calculate the mean of f0
+t = mean(f0(:));
+
+% Create the f01 image by adjusting the contrast
+f01 = 1 + ((t ./ f0) - 1) * 2;
+
+end
+
