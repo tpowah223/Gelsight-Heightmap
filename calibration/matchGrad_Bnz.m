@@ -1,4 +1,4 @@
-function [ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI, f0,f01, validmask)
+function [ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI, f0,f01, validMask)
 % LookupTable is the look up table structure; dI is the difference; 
 % f01 and validmask are not necessary
 % f0 is the initializaion image. In current
@@ -8,11 +8,11 @@ function [ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI,
 %
 % Wenzhen Yuan (yuanwenzhen@gmail.com), Feb 2017
 
-if ~exist('f01')
-    f0=double(f0);
-    t=mean(f0(:));
-    f01=1+((t./f0)-1)*2;
-end
+%if ~exist('f01')
+ %   f0=double(f0);
+  %  t=mean(f0(:));
+   % f01=1+((t./f0)-1)*2;
+%end
 
 size1=size(dI,1);size2=size(dI,2);
 ImGradMag=zeros(size1,size2);
@@ -20,9 +20,9 @@ ImGradDir=zeros(size1,size2);
 dI=dI.*f01;
 
 binm=LookupTable.bins-1;
-if exist('validmask')    
+if exist('validMask')    
     sizet=size1*size2;sizet2=2*sizet;
-    validid=find(validmask);
+    validid=find(validMask);
     r1=dI(validid);g1=dI(validid+sizet);b1=dI(validid+sizet2);
     r2=(r1-LookupTable.Zeropoint)/LookupTable.Scale;
     g2=(g1-LookupTable.Zeropoint)/LookupTable.Scale;

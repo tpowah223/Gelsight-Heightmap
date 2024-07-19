@@ -1,4 +1,4 @@
-function [ContactMask, ValidMap, center, Radius] = FindBallArea_manual(I, frame, MANUAL)
+function [ContactMask, ValidMap, center, Radius] = FindBallArea_coarse(I, frame, MANUAL)
 % find the circle in the pressing sphere sample case.
 % The input matrix I is single-channelled, the result of the current image
 % subtract the background
@@ -16,7 +16,7 @@ end
 
 % Initial parameters
 center = [size(I, 2) / 2, size(I, 1) / 2];  % Center of the image
-Radius = min(size(I)) / 4;  % Initial radius
+Radius = min(size(I)) / 16;  % Initial radius
 colors = {'r', 'g', 'b', 'y', 'm', 'c', 'w'};  % Color options
 colorIndex = 1;
 color = colors{colorIndex};
