@@ -19,9 +19,9 @@ f0 = iniFrame(frame0, border);
 frame=imread([location framename] );
 
 frame_=frame(border+1:end-border,border+1:end-border,:);
-I=double(frame_)- f0;
+I=frame- f0;
 
-[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, I, f0);
+[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI, f0,f01, validMask);
 hm=fast_poisson2(ImGradX, ImGradY);
 
 
