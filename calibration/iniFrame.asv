@@ -1,35 +1,25 @@
-function [f0, f01]=iniFrame(frame0, border) 
-% 1)filter with a Gaussian filter and cut border to get f1 2) after convolution, if the difference between original image and filtered image is less than 5
-% keep 85% of the original image + 15% fitered image, this is f0
+function [f0, f01]=iniFrame(frame0, ~) 
 
+kscale = 50; % Kernel scale for the Gaussian filter
 
-% frame0 is the raw data from camera
-kscale=70; %what dis is
-kernnel=fspecial('gaussian',[kscale*2 kscale*2],kscale*1);
-% fspecial ( gaussian, hsize, sigma)
-% better to use imgaussfilt for 2d or filt3 for 3d
+% Apply Gaussian filter using built-in function
+f0 = imgaussfilt(frame0, kscale);
 
-%convolutions and cropping
-%is dis necessary
-frame0_=double(frame0);
-f0(:,:,1)=conv2(frame0_(:,:,1),kernnel,'same');
-f0(:,:,2)=conv2(frame0_(:,:,2),kernnel,'same');
-f0(:,:,3)=conv2(frame0_(:,:,3),kernnel,'same');
-f0=f0(border+1:end-border,border+1:end-border,:);
+% Compute the mean difference between the original and filtered image
+dI = mean(frame0 - f0, 3);
 
-frame_=frame0_(border+1:end-border,border+1:end-border,:);
-dI=mean(f0-frame_,3);
+% Adaptive threshold based on image statistics
+threshold = mean(dI(:)) + std(dI(:));
 
-%if ther is a small (5) difference in the values of f0 and frame, this 
-% weights the result to mostally the original image and .15 of filtered
-% image, doesnt seem strictly necessary, have to figure out what else
-% depends on f01
+% Blend original and filtered image based on adaptive threshold
+blendMask = dI < threshold;
+f0(blendMask) = f0(blendMask) * 0.15 + frame0_(blendMask) * 0.85;
 
-id=find(dI<5);
-pixcount=size(f0,1)*size(f0,2);
-f0(id)=f0(id)*0.15+frame_(id)*0.85;
-f0(id+pixcount)=f0(id+pixcount)*0.15+frame_(id+pixcount)*0.85;
-f0(id+pixcount*2)=f0(id+pixcount*2)*0.15+frame_(id+pixcount*2)*0.85;
+% Calculate the mean of f0
+t = mean(f0(:));
 
-t=mean(f0(:));
-f01=1+((t./f0)-1)*2;
+% Create the f01 image by adjusting the contrast
+f01 = 1 + ((t ./ f0) - 1) * 2;
+
+end
+

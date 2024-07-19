@@ -44,10 +44,10 @@ for Frn = 1:length(ImList)
     frame = imread([Inputfolder ImList(Frn).name]);
     disp(['Calibration on Frame ' num2str(Frn)]);
     frame_ = frame(border+1:end-border, border+1:end-border, :);
-    I = double(frame) - f0;
-    dI = (min(I, [], 3) - max(I, [], 3)) / 2;
+    I = frame - f0;
+    dI = (min(I, [], 3) - max(I, [], 3)) / 2; %how this work
     
-    [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(dI, frame_, BALL_MANUAL);
+    [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(dI, frame, BALL_MANUAL);
     validMask = validMask & ContactMask;
     
     nomarkermask = min(-I, [], 3) < 30;
