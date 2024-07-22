@@ -7,11 +7,9 @@ clear LookupTable;
 Inputfolder='../testpics/7.16.2/';
 lookupfile=[Inputfolder 'testpics.mat'];
 
-[framename,location] = uigetfile('Im*.jpg');
+[framename,location] = uigetfile('Im*.jpg', 'select images', '../testpics/');
 
 border=0;
-
-
 load(lookupfile);
 
 frame0=imread([Inputfolder 'frame0.jpg']); % ref image
