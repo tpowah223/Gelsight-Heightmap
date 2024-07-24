@@ -8,14 +8,14 @@
 %
 % Mod by Wenzhen Yuan (yuanwenzhen@gmail.com), Jan 2018
 
-clear; close all;
+clear; %close all;
 BallRad=12.414; %25.4/2; % Ball's radius, in mm
 border= 0; % i dont think we need a border
 BALL_MANUAL=1;      % whether to find the ball manually
 
 %% Check the folder and the calibration file name
 name2 = 'testpics';
-Inputfolder = '../testpics/7.16.2/';
+Inputfolder = '../testpics/7.22.1/';
 savename = [name2 '.mat'];
 
 %% Generate lookup table
@@ -25,7 +25,7 @@ gradir = [];
 countmap = [];
 
 % Initialize zeropoint and lookscale with default values
-zeropoint = -120; % slight improvement in eliminating noise when raised, but beyond 120 it does not make significant changes
+zeropoint = -90; % slight improvement in eliminating noise when raised, but beyond 120 it does not make significant changes
 lookscale = 180; % Default lookscale
 
 Pixmm = 0.022048309; % for 967*951 pix, 137*148 (mm)
@@ -44,15 +44,15 @@ for Frn = 1:length(ImList)
     frame = imread([Inputfolder ImList(Frn).name]);
     disp(['Calibration on Frame ' num2str(Frn)]);
     frame_ = frame(border+1:end-border, border+1:end-border, :);
-    I = frame - f0;
-    dI = (min(I, [], 3) - max(I, [], 3)) / 2; %how this work
+    I = im2double(frame) - f0;
+    %dI = (min(I, [], 3) - max(I, [], 3)) / 2; %how this work
+    %testing if dI is helpful, I seems to be the real difference
+    [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(I, frame, BALL_MANUAL);
+    validMask = ContactMask;%validMask & ContactMask;
     
-    [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(dI, frame, BALL_MANUAL);
-    validMask = validMask & ContactMask;
-    
-    nomarkermask = min(-I, [], 3) < 30;
-    nomarkermask = imerode(nomarkermask, strel('disk', 3));
-    validMask = validMask & nomarkermask;
+    %nomarkermask = min(-I, [], 3) < 30;
+    %nomarkermask = imerode(nomarkermask, strel('disk', 3));
+    %validMask = validMask & nomarkermask;
     
     [gradmag, gradir, countmap] = LookuptableFromBall_Bnz(I, f0, bins, touchCenter, BallRad, Pixmm, validMask, gradmag, gradir, countmap, zeropoint, lookscale);
 end
