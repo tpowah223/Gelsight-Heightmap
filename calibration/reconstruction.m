@@ -4,7 +4,7 @@ clear LookupTable;
 
 
 %% Check the folder and the calibration file name
-Inputfolder='../testpics/7.16.2/';
+Inputfolder='../testpics/7.22.1/';
 lookupfile=[Inputfolder 'testpics.mat'];
 
 [framename,location] = uigetfile('Im*.jpg', 'select images', '../testpics/');
@@ -17,9 +17,12 @@ f0 = iniFrame(frame0, border);
 frame=imread([location framename] );
 
 frame_=frame(border+1:end-border,border+1:end-border,:);
-I=frame- f0;
+I=im2double(frame)- f0;
 
-[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI, f0,f01, validMask);
+[ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(I, frame, BALL_MANUAL);
+validMask = ContactMask; %added so that the valid mask for the picture reconstructed actually matches the picture being reconstructed
+
+[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, I, f0);
 hm=fast_poisson2(ImGradX, ImGradY);
 
 
@@ -27,9 +30,12 @@ hm=fast_poisson2(ImGradX, ImGradY);
 figure;
 tiledlayout(1,2);
 
+A1 = framename;
+formatSpec = 'Captured 2D image of %s';
+str = sprintf(formatSpec, A1);
 nexttile;
 imshow(frame_);
-title("Captured 2D image");
+title(str);
 
 nexttile;
 tt=mesh(hm);  %axis equal;
