@@ -16,11 +16,13 @@ end
 
 % Initial parameters
 center = [size(I, 2) / 2, size(I, 1) / 2];  % Center of the image
-Radius = min(size(I)) / 16;  % Initial radius
+Radius = min(size(I)) / 13;  % Initial radius
 colors = {'r', 'g', 'b', 'y', 'm', 'c', 'w'};  % Color options
 colorIndex = 1;
 color = colors{colorIndex};
-kstep = 10;  % Step size for adjustments
+kstepxy = 10;  % Step size for adjustments
+kstepz = 6; %in and out adjustments
+
 
 if MANUAL
     % Display the image
@@ -37,17 +39,17 @@ if MANUAL
             if c == 27  % ESC
                 break;
             elseif c == 'w'  % Move up
-                center(2) = center(2) - kstep;
+                center(2) = center(2) - kstepxy;
             elseif c == 's'  % Move down
-                center(2) = center(2) + kstep;
+                center(2) = center(2) + kstepxy;
             elseif c == 'a'  % Move left
-                center(1) = center(1) - kstep;
+                center(1) = center(1) - kstepxy;
             elseif c == 'd'  % Move right
-                center(1) = center(1) + kstep;
+                center(1) = center(1) + kstepxy;
             elseif c == '+'  % Increase radius
-                Radius = Radius + kstep;
+                Radius = Radius + kstepz;
             elseif c == '-'  % Decrease radius
-                Radius = Radius - kstep;
+                Radius = Radius - kstepz;
             elseif c == 'c'  % Change color
                 colorIndex = mod(colorIndex, length(colors)) + 1;
                 color = colors{colorIndex};
@@ -66,8 +68,12 @@ end
 [xq, yq] = meshgrid(1:size(I, 2), 1:size(I, 1));
 xq = xq - center(1);
 yq = yq - center(2);
-rq = xq.^2 + yq.^2;
-ContactMask = (rq < (Radius^2));
-ValidMap = true(size(I));  % Assuming the whole image is valid for now
+rq = sqrt(xq.^2 + yq.^2);
+ContactMask = (rq < (Radius));
+%using the mask to actually mask all of the parts outside of the ball
+ValidMap = repmat(ContactMask, [1, 1, size(I, 3)]);
+% Use the mask to modify the image I
+% For example, set pixels outside the mask to zero
+I(~ValidMap) = 0;
 
 end
