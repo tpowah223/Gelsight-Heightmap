@@ -16,7 +16,7 @@ end
 
 % Initial parameters
 center = [size(I, 2) / 2, size(I, 1) / 2];  % Center of the image
-Radius = min(size(I)) / 13;  % Initial radius
+Radius = 60;  % Initial radius
 colors = {'r', 'g', 'b', 'y', 'm', 'c', 'w'};  % Color options
 colorIndex = 1;
 color = colors{colorIndex};
@@ -27,7 +27,7 @@ kstepz = 6; %in and out adjustments
 if MANUAL
     % Display the image
     hf = figure;
-    himage = imshow(frame); 
+    himage = imshow((rgb2gray(frame)); %gray so that the outline of the ball is clear
     hold on;
     viscircles(center, Radius, 'EdgeColor', color); 
     
@@ -70,10 +70,10 @@ xq = xq - center(1);
 yq = yq - center(2);
 rq = sqrt(xq.^2 + yq.^2);
 ContactMask = (rq < (Radius));
-%using the mask to actually mask all of the parts outside of the ball
+% using the mask to set everything outside of the circle chosen in the
+% calibration frame to 0
 ValidMap = repmat(ContactMask, [1, 1, size(I, 3)]);
-% Use the mask to modify the image I
-% For example, set pixels outside the mask to zero
+% Use the mask to modify the image I as stated above
 I(~ValidMap) = 0;
 
 end

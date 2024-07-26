@@ -30,29 +30,41 @@ yq=(yq-center(2));    % in mm
 validid=find(validMask);
 xvalid=xq(validid);yvalid=yq(validid);
 rvalid=sqrt(xvalid.^2+yvalid.^2);
+
 if max(rvalid-BallRad)>0
     display('Contact Radius is too large. Ignoring the exceeding area');
     rvalid(rvalid>BallRad)=BallRad-0.001;
 end
 
-gradxseq=asin(rvalid/BallRad);gradyseq=atan2(-yvalid, -xvalid);
+gradxseq=asin(rvalid/BallRad);
+gradyseq=atan2(-yvalid, -xvalid);
 
 %% colorvalid
 binm=bins-1;
 sizet=sizex*sizey;sizet2=sizet*2;
-r1=dI(validid).*f01(validid);g1=dI(validid+sizet).*f01(validid+sizet);b1=dI(validid+sizet2).*f01(validid+sizet2);
-r2=(r1-zeropoint)/lookscale;r2(r2<0)=0;r2(r2>1)=1;
-g2=(g1-zeropoint)/lookscale;g2(g2<0)=0;g2(g2>1)=1;
-b2=(b1-zeropoint)/lookscale;b2(b2<0)=0;b2(b2>1)=1;
+r1=dI(validid).*f01(validid);
+g1=dI(validid+sizet).*f01(validid+sizet);
+b1=dI(validid+sizet2).*f01(validid+sizet2);
+
+r2=(r1-zeropoint)/lookscale;r2(r2<0)=0;
+r2(r2>1)=1;
+g2=(g1-zeropoint)/lookscale;g2(g2<0)=0;
+g2(g2>1)=1;
+b2=(b1-zeropoint)/lookscale;b2(b2<0)=0;
+b2(b2>1)=1;
+
 r3=floor(r2*binm)+1;
 g3=floor(g2*binm)+1;
 b3=floor(b2*binm)+1;
+
 %% save lookuptable
 if ~(exist('gradmag') && size(gradmag,1))    % no previous table
     gradmag=zeros(bins, bins, bins);
     countmap=gradmag;graddir=gradmag;
 end
 
+%I believe this is what updates the lookuptable with new entries and such,
+%but might need further exploration
 for i=1:length(r1)
     t1=countmap(r3(i), g3(i), b3(i));
     countmap(r3(i), g3(i), b3(i))=countmap(r3(i), g3(i), b3(i))+1;

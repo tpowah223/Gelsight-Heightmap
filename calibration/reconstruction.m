@@ -4,7 +4,7 @@ clear LookupTable;
 
 
 %% Check the folder and the calibration file name
-Inputfolder='../testpics/7.22.1/';
+Inputfolder='../testpics/7.24.1/';
 lookupfile=[Inputfolder 'testpics.mat'];
 
 [framename,location] = uigetfile('Im*.jpg', 'select images', '../testpics/');
@@ -17,12 +17,14 @@ f0 = iniFrame(frame0, border);
 frame=imread([location framename] );
 
 frame_=frame(border+1:end-border,border+1:end-border,:);
-I=im2double(frame)- f0;
+I=double(frame)- f0;
 
 [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(I, frame, BALL_MANUAL);
-validMask = ContactMask; %added so that the valid mask for the picture reconstructed actually matches the picture being reconstructed
+validMask = ContactMask; 
+% added this so that the valid mask for the picture reconstructed actually matches the picture being reconstructed
+% zeropointR = ; zeropointG = ; zeropointB = ; might try to adjust color scaling with this
 
-[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, I, f0);
+[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, I, f0,f01,validMask);
 hm=fast_poisson2(ImGradX, ImGradY);
 
 

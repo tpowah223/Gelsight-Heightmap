@@ -12,14 +12,15 @@ clear; %close all;
 BallRad=12.414; %25.4/2; % Ball's radius, in mm
 border= 0; % i dont think we need a border
 BALL_MANUAL=1;      % whether to find the ball manually
+%I dont have a separate functions folder, i run everything under 'Gelsight'
 
 %% Check the folder and the calibration file name
 name2 = 'testpics';
-Inputfolder = '../testpics/7.22.1/';
+Inputfolder = '../testpics/7.24.1/';
 savename = [name2 '.mat'];
 
 %% Generate lookup table
-bins = 80;
+bins = 80;%how would changing bin size affect lookuptable and recon, try 40-120
 gradmag = [];
 gradir = [];
 countmap = [];
@@ -28,7 +29,7 @@ countmap = [];
 zeropoint = -90; % slight improvement in eliminating noise when raised, but beyond 120 it does not make significant changes
 lookscale = 180; % Default lookscale
 
-Pixmm = 0.022048309; % for 967*951 pix, 137*148 (mm)
+Pixmm =  0.028; %resolution/physical area of gel set up %0.022048309;for 967*951 pix, 137*148 (mm)
 
 BallRad_pix = BallRad / Pixmm;
 
@@ -44,13 +45,14 @@ for Frn = 1:length(ImList)
     frame = imread([Inputfolder ImList(Frn).name]);
     disp(['Calibration on Frame ' num2str(Frn)]);
     frame_ = frame(border+1:end-border, border+1:end-border, :);
-    I = im2double(frame) - f0;
-    %dI = (min(I, [], 3) - max(I, [], 3)) / 2; %how this work
+    I = double(frame) - f0;
+    %dI = (min(I, [], 3) - max(I, [], 3)) / 2; % does not seem critical
     %testing if dI is helpful, I seems to be the real difference
     [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(I, frame, BALL_MANUAL);
     validMask = ContactMask;%validMask & ContactMask;
     
-    %nomarkermask = min(-I, [], 3) < 30;
+    %nomarkermask = min(-I, [], 3) < 30; also appear non-critical, but will
+    %test with and without again
     %nomarkermask = imerode(nomarkermask, strel('disk', 3));
     %validMask = validMask & nomarkermask;
     
