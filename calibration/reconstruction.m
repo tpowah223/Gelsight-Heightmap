@@ -4,39 +4,67 @@ clear LookupTable;
 
 
 %% Check the folder and the calibration file name
-Inputfolder='../testpics/7.24.1/';
-lookupfile=[Inputfolder 'testpics.mat'];
+folder=input('what folder will be used to reconstruct: ');
+path2folder='../testpics/';
+Inputfolder = strcat(path2folder,folder,'/');
+fname=strcat(folder,'.mat');
+lookupfile=[Inputfolder fname];
 
-[framename,location] = uigetfile('Im*.jpg', 'select images', '../testpics/');
+[framename,location] = uigetfile('*.jpg', 'select images', Inputfolder);
 
-border=0;
 load(lookupfile);
-
-frame0=imread([Inputfolder 'frame0.jpg']); % ref image
-f0 = iniFrame(frame0, border);
 frame=imread([location framename] );
 
-frame_=frame(border+1:end-border,border+1:end-border,:);
-I=double(frame)- f0;
+frame0=imread([Inputfolder 'frame0.jpg']); % ref image
+[f0,f01] = iniFrame(frame0);
 
-[ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(I, frame, BALL_MANUAL);
-validMask = ContactMask; 
-% added this so that the valid mask for the picture reconstructed actually matches the picture being reconstructed
-% zeropointR = ; zeropointG = ; zeropointB = ; might try to adjust color scaling with this
+% Display the image
+figure;
+imshow(frame);
+title('Draw ROI to create mask');
 
-[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, I, f0,f01,validMask);
+% Draw a polygonal ROI
+h = drawpolygon('FaceAlpha',0, 'EdgeColor', 'b');
+
+% Wait for the user to finish drawing
+wait(h);
+
+% Create a binary mask from the ROI
+mask = createMask(h);
+
+% Convert the mask to a logical array
+mask = logical(mask);
+
+% Display the mask
+figure;
+imshow(mask);
+title('Generated Mask');
+
+% Apply the mask to the image
+% Ensure the mask is the same size as the image
+frameMasked = double(frame);
+frameMasked(repmat(~mask, [1, 1, 3])) = 0;  % Set areas outside mask to zero
+I=frameMasked-f0;
+%Generating Gradients
+%RGB style
+[ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, I, f0);
+
+
+%solving for height map
 hm=fast_poisson2(ImGradX, ImGradY);
 
-
+%graphing
 
 figure;
 tiledlayout(1,2);
 
 A1 = framename;
-formatSpec = 'Captured 2D image of %s';
-str = sprintf(formatSpec, A1);
+A2= Inputfolder;
+formatSpec = 'Captured 2D image of %s from %s';
+str = sprintf(formatSpec, A1, A2);
+
 nexttile;
-imshow(frame_);
+imshow(frame);
 title(str);
 
 nexttile;
@@ -47,8 +75,16 @@ title("Reconstructured 3D");
 set(tt, 'YData', -1*get(tt,'YData'))
 view(2);
 
-%exportgraphics(figure, 'rst'+framename);
+A3='rst';
+A4 = framename(1:end-4);
+prompt="What did you change?: ";
+changed = input(prompt,'s');
+f='%s_%s_%s';
+g=sprintf(f, A3,changed,A4);
 
+folderPath='../comparisons/';
+fullFilePath = fullfile(folderPath, g);
+savefig(figure,fullFilePath);
 % reduce the reconstructed 3D surface size.
 hmm = shortArray(hm, 15); 
 
