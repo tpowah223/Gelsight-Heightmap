@@ -20,14 +20,19 @@ Radius = 60;  % Initial radius
 colors = {'r', 'g', 'b', 'y', 'm', 'c', 'w'};  % Color options
 colorIndex = 1;
 color = colors{colorIndex};
-kstepxy = 10;  % Step size for adjustments
+
+colgrad={frame,rgb2gray(frame)};
+colGradIndex =1;
+img=colgrad{colGradIndex};
+
+kstepxy = 8;  % Step size for adjustments
 kstepz = 6; %in and out adjustments
 
 
 if MANUAL
     % Display the image
     hf = figure;
-    himage = imshow((rgb2gray(frame)); %gray so that the outline of the ball is clear
+    himage = imshow(img); %gray so that the outline of the ball is clear
     hold on;
     viscircles(center, Radius, 'EdgeColor', color); 
     
@@ -53,10 +58,13 @@ if MANUAL
             elseif c == 'c'  % Change color
                 colorIndex = mod(colorIndex, length(colors)) + 1;
                 color = colors{colorIndex};
+            elseif c == 'r'  % change img coloring to see ball outline better
+                colGradIndex = mod(colGradIndex, length(img))+1;
+                img = colgrad{colGradIndex};
             end
             
             % Redraw the circle
-            imshow(frame);  % Refresh the image
+            imshow((img));  % Refresh the image
             hold on;
             viscircles(center, Radius, 'EdgeColor', color);
         end
