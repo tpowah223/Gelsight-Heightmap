@@ -1,4 +1,4 @@
-function [ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI, f0,f01, validMask)
+function [ImGradX, ImGradY, ImGradMag, ImGradDir]=matchGrad_Bnz(LookupTable, dI, f0,f01, BallMask)
 % LookupTable is the look up table structure; dI is the difference; 
 % f01 and validmask are not necessary
 % f0 is the initializaion image. In current
@@ -17,15 +17,15 @@ end
 size1=size(dI,1);size2=size(dI,2); %dI rows (1) , columns (2)
 ImGradMag=zeros(size1,size2);
 ImGradDir=zeros(size1,size2);
-dI=dI.*f01;
+DI=dI.*f01;
 
 binm=LookupTable.bins-1;
-if exist('validMask')    
+if exist('BallMask')    
     sizet=size1*size2;%size of the channels, helps access G
     sizet2=2*sizet;%offset to get B channel
-    validid=find(validMask); %gets positions of true/white values in the mask
+    validid=find(BallMask); %gets positions of true/white values in the mask
 
-    r1=dI(validid);g1=dI(validid+sizet);b1=dI(validid+sizet2); %accessing values of rgb
+    r1=DI(validid);g1=DI(validid+sizet);b1=DI(validid+sizet2); %accessing values of rgb
 
     r2=(r1-LookupTable.Zeropoint)/LookupTable.Scale; %scaling and normalizing factors
     g2=(g1-LookupTable.Zeropoint)/LookupTable.Scale;
@@ -39,7 +39,7 @@ if exist('validMask')
     ImGradDir(validid)=LookupTable.GradDir(ind);
     
 else    % when there is no mask and all are calculated
-    r1=dI(:,:,1);g1=dI(:,:,2);b1=dI(:,:,3);
+    r1=DI(:,:,1);g1=DI(:,:,2);b1=DI(:,:,3);
     r2=(r1-LookupTable.Zeropoint)/LookupTable.Scale;r2=fix1(r2);
     g2=(g1-LookupTable.Zeropoint)/LookupTable.Scale;g2=fix1(g2);
     b2=(b1-LookupTable.Zeropoint)/LookupTable.Scale;b2=fix1(b2);
