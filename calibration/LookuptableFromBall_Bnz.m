@@ -1,4 +1,4 @@
-function [gradmag, graddir, countmap]=LookuptableFromBall_Bnz(dI,f0, bins, center, BallRad, Pixmm, validMask,gradmag, graddir, countmap, zeropoint, lookscale, f01)
+function [gradmag, graddir, countmap]=LookuptableFromBall_Bnz(dI,f0, bins, center,Radius, BallRad, Pixmm, ValidMap,gradmag, graddir, countmap, zeropoint, lookscale, f01)
 % Calibration function for GelSight-Bnz sensor
 % dI is the differencew image, 3 channel;f0 is the initialized image
 % dI shall be positive mostly
@@ -27,16 +27,16 @@ sizey=size(dI,1);sizex=size(dI,2);
 [xq, yq]=meshgrid(1:sizex, 1:sizey);
 xq=(xq-center(1));    % in mm
 yq=(yq-center(2));    % in mm
-validid=find(validMask);
+validid=find(ValidMap);
 xvalid=xq(validid);yvalid=yq(validid);
 rvalid=sqrt(xvalid.^2+yvalid.^2);
 
-if max(rvalid-BallRad)>0
+if max(rvalid-Radius)>0
     display('Contact Radius is too large. Ignoring the exceeding area');
-    rvalid(rvalid>BallRad)=BallRad-0.001;
+    rvalid(rvalid>Radius)=Radius-0.001;
 end
 
-gradxseq=asin(rvalid/BallRad);
+gradxseq=asin(rvalid/Radius);
 gradyseq=atan2(-yvalid, -xvalid);
 
 %% colorvalid
