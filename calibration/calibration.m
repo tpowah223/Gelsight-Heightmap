@@ -15,9 +15,11 @@ BALL_MANUAL=1;      % whether to find the ball manually
 %I dont have a separate functions folder, i run everything under 'Gelsight'
 
 %% Check the folder and the calibration file name
-name2 = 'testpics';
-Inputfolder = '../testpics/7.24.1/';
-savename = [name2 '.mat'];
+
+folder=input('what folder will be used to calibrate: ');
+path2folder='../testpics/';
+Inputfolder = strcat(path2folder,folder,'/');
+savename = [folder '.mat'];
 
 %% Generate lookup table
 bins = 80;%how would changing bin size affect lookuptable and recon, try 40-120
@@ -29,34 +31,35 @@ countmap = [];
 zeropoint = -90; % slight improvement in eliminating noise when raised, but beyond 120 it does not make significant changes
 lookscale = 180; % Default lookscale
 
-Pixmm =  0.028; %resolution/physical area of gel set up %0.022048309;for 967*951 pix, 137*148 (mm)
+Pixmm = input("what is the pixmm for this set: ");
 
 BallRad_pix = BallRad / Pixmm;
 
 % Read Initial Image
 frame0 = imread([Inputfolder 'frame0.jpg']);
-[f0, f01] = iniFrame(frame0, border);
+[f0,f01]=iniFrame(frame0);
+
 
 % List of calibration images
-ImList = dir([Inputfolder 'Im*']);
+ImList = dir([Inputfolder 'Im*.jpg']); %Im or cal for cal images
 
 % Process each calibration image
 for Frn = 1:length(ImList)
+
     frame = imread([Inputfolder ImList(Frn).name]);
     disp(['Calibration on Frame ' num2str(Frn)]);
-    frame_ = frame(border+1:end-border, border+1:end-border, :);
-    I = double(frame) - f0;
-    %dI = (min(I, [], 3) - max(I, [], 3)) / 2; % does not seem critical
-    %testing if dI is helpful, I seems to be the real difference
-    [ContactMask, validMask, touchCenter, Radius] = FindBallArea_coarse(I, frame, BALL_MANUAL);
-    validMask = ContactMask;%validMask & ContactMask;
+    dI = (double(frame)-f0); %try double and im2double
+
+    [ContactMask, ValidMap, touchCenter, Radius] = FindBallArea_coarse(dI,frame, BALL_MANUAL);
+    ValidMap = ContactMask;%validMask & ContactMask;
     
     %nomarkermask = min(-I, [], 3) < 30; also appear non-critical, but will
     %test with and without again
+
     %nomarkermask = imerode(nomarkermask, strel('disk', 3));
     %validMask = validMask & nomarkermask;
     
-    [gradmag, gradir, countmap] = LookuptableFromBall_Bnz(I, f0, bins, touchCenter, BallRad, Pixmm, validMask, gradmag, gradir, countmap, zeropoint, lookscale);
+    [gradmag, gradir, countmap] = LookuptableFromBall_Bnz(dI, f0, bins, touchCenter, Radius, BallRad, Pixmm, ValidMap, gradmag, gradir, countmap, zeropoint, lookscale);
 end
 
 disp('Internal calibration process starts');
