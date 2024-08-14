@@ -1,4 +1,4 @@
-function [f0, f01]=iniFrame(frame0, ~) 
+function [f0,f01]=iniFrame(frame0) 
 % 1)filter with a Gaussian filter and cut border to get f0
 % 2) after convolution, if the difference between original image and
 % filtered image is less than threshold
@@ -12,10 +12,10 @@ frame0_ = double(frame0);
 f0 = imgaussfilt(frame0_, kscale);
 
 % Compute the mean difference between the original and filtered image
-dI = mean(f0 - frame0_, 3);
+dI = mean(f0-frame0_,3);
 
 % Adaptive threshold based on image statistics
-threshold = mean(dI(:)) + std(dI(:));
+threshold = mean(dI(:))+ std(dI(:));
 
 % Blend original and filtered image based on adaptive threshold
 blendMask = dI < threshold;
