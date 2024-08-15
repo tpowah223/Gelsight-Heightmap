@@ -22,16 +22,17 @@ Inputfolder = strcat(path2folder,folder,'/');
 savename = [folder '.mat'];
 
 %% Generate lookup table
-bins = 80;%how would changing bin size affect lookuptable and recon, try 40-120
+bins = 80; %increasing bin amount decreases their size allowing for subtler changes in intensity.
+%initialize grads
 gradmag = [];
 gradir = [];
 countmap = [];
 
 % Initialize zeropoint and lookscale with default values
-zeropoint = -90; % slight improvement in eliminating noise when raised, but beyond 120 it does not make significant changes
-lookscale = 180; % Default lookscale
+zeropoint = input("what do you want the zeropoint to be (-90 was default): "); % -90 was default
+lookscale = input("what do you want the lookscale to be (180 was default): "); % 180 was Default lookscale
 
-Pixmm = input("what is the pixmm for this set: ");
+Pixmm = input("what is the pixmm for this set (reall world area to camera resolution) mm^2/pix: ");
 
 BallRad_pix = BallRad / Pixmm;
 

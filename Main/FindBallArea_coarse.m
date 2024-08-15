@@ -21,7 +21,7 @@ colors = {'r', 'g', 'b', 'y', 'm', 'c', 'w'};  % Color options
 colorIndex = 1;
 color = colors{colorIndex};
 
-colgrad={frame,rgb2gray(frame)};
+colgrad={frame,rgb2gray(frame), frame, rgb2gray(frame)};
 colGradIndex =1;
 img=colgrad{colGradIndex};
 

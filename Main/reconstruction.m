@@ -4,13 +4,12 @@ clear LookupTable;
 
 
 %% Check the folder and the calibration file name
-folder=input('what folder will be used to reconstruct: ');
 path2folder='../testpics/';
 Inputfolder = strcat(path2folder,folder,'/');
 fname=strcat(folder,'.mat');
 lookupfile=[Inputfolder fname];
 
-[framename,location] = uigetfile('*.jpg', 'select images', Inputfolder);
+[framename,location] = uigetfile('*.jpg', 'select images', path2folder);
 
 load(lookupfile);
 frame=imread([location framename] );
